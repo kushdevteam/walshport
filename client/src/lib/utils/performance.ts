@@ -144,7 +144,7 @@ export class PerformanceMonitor {
     return this.fps;
   }
 
-  getMemoryUsage(): MemoryInfo | undefined {
+  getMemoryUsage(): any {
     return (performance as any).memory;
   }
 }
@@ -153,9 +153,6 @@ export const performanceMonitor = new PerformanceMonitor();
 
 // Utility functions
 export const optimizeGeometry = (geometry: THREE.BufferGeometry): THREE.BufferGeometry => {
-  // Merge vertices that are close together
-  geometry.mergeVertices();
-  
   // Compute vertex normals for better lighting
   if (!geometry.attributes.normal) {
     geometry.computeVertexNormals();

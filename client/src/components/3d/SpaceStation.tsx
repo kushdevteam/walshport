@@ -97,7 +97,7 @@ export default function SpaceStation({ position }: SpaceStationProps) {
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
       >
-        DEVVERSE
+        WLSFX
       </Text>
 
       <Text

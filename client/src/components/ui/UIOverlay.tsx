@@ -10,7 +10,7 @@ export default function UIOverlay() {
       {/* Navigation instructions */}
       <div className="absolute bottom-4 left-4 text-cyan-400 font-mono text-sm pointer-events-auto">
         <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg p-3 border border-cyan-400/30">
-          <p className="mb-1">🚀 Use mouse to explore the Devverse</p>
+          <p className="mb-1">🚀 Use mouse to explore WLSFX</p>
           <p className="mb-1">🎯 Click portals to navigate sections</p>
           <p className="text-xs text-cyan-300">Current: {currentSection || 'home'}</p>
         </div>
@@ -65,13 +65,6 @@ export default function UIOverlay() {
         </div>
       </div>
 
-      {/* Loading indicator */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-cyan-400 font-mono">
-        <div className="animate-pulse">
-          <div className="text-2xl mb-2">🌌 DEVVERSE</div>
-          <div className="text-sm">Initializing 3D portfolio...</div>
-        </div>
-      </div>
     </div>
   );
 }

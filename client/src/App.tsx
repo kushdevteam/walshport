@@ -50,7 +50,7 @@ function App() {
     return (
       <div className="w-screen h-screen bg-black flex items-center justify-center">
         <div className="text-cyan-400 font-mono text-center">
-          <div className="text-4xl mb-4">🌌 DEVVERSE</div>
+          <div className="text-4xl mb-4">🌌 WLSFX</div>
           <div className="text-lg animate-pulse">Initializing...</div>
         </div>
       </div>
@@ -66,6 +66,7 @@ function App() {
     );
   }
 
+
   // Show 3D portfolio if WebGL is supported
   return (
     <QueryClientProvider client={queryClient}>
@@ -80,17 +81,27 @@ function App() {
           }}
           gl={{
             antialias: true,
-            powerPreference: "default", // Changed to default instead of high-performance
+            powerPreference: "default",
             failIfMajorPerformanceCaveat: false,
             alpha: true,
             preserveDrawingBuffer: false
           }}
           onCreated={({ gl }) => {
             console.log('WebGL renderer initialized successfully');
+            
+            // Handle WebGL context lost/restored events
+            const canvas = gl.domElement;
+            canvas.addEventListener('webglcontextlost', (event) => {
+              event.preventDefault();
+              console.warn('WebGL context lost, attempting to restore...');
+            });
+            
+            canvas.addEventListener('webglcontextrestored', () => {
+              console.log('WebGL context restored');
+            });
           }}
           onError={(error) => {
             console.error('Canvas creation error:', error);
-            // Fallback to 2D mode if Canvas fails
             setWebglSupport({
               isSupported: false,
               error: 'WebGL context creation failed',

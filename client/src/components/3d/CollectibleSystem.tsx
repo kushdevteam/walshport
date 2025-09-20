@@ -139,7 +139,7 @@ export default function CollectibleSystem() {
             anchorY="middle"
             font="/fonts/inter.json"
           >
-            You've discovered all hidden treasures in the Devverse!
+            You've discovered all hidden treasures in WLSFX!
           </Text>
           
           <Text

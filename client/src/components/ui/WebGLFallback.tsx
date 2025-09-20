@@ -39,7 +39,7 @@ export default function WebGLFallback({ error }: WebGLFallbackProps) {
         {/* Header */}
         <div className="text-center pt-12 pb-8">
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-4">
-            DEVVERSE
+            WLSFX
           </h1>
           <p className="text-xl text-purple-300 mb-4">
             Web3 & Game Developer Portfolio

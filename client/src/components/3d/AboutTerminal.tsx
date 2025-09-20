@@ -77,7 +77,7 @@ export default function AboutTerminal() {
         anchorY="top"
         font="/fonts/inter.json"
       >
-        user@devverse:~$ cat about.txt
+        user@wlsfx:~$ cat about.txt
       </Text>
 
       {/* About content */}
