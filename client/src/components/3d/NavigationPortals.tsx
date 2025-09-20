@@ -1,6 +1,6 @@
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, Suspense } from "react";
 import * as THREE from "three";
 import { usePortfolio } from "../../lib/stores/usePortfolio";
 import { useAudio } from "../../lib/stores/useAudio";
@@ -115,16 +115,18 @@ export default function NavigationPortals() {
           </mesh>
 
           {/* Portal label */}
-          <Text
-            position={[0, -1.5, 0]}
-            fontSize={0.3}
-            color={portal.color}
-            anchorX="center"
-            anchorY="middle"
-            font="/fonts/inter.json"
-          >
-            {portal.label}
-          </Text>
+          <Suspense fallback={null}>
+            <Text
+              position={[0, -1.5, 0]}
+              fontSize={0.3}
+              color={portal.color}
+              anchorX="center"
+              anchorY="middle"
+              font="/fonts/inter.json"
+            >
+              {portal.label}
+            </Text>
+          </Suspense>
 
           {/* Active indicator */}
           {currentSection === portal.section && (

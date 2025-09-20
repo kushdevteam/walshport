@@ -1,5 +1,5 @@
 import { useFrame } from "@react-three/fiber";
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, Suspense } from "react";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -87,29 +87,31 @@ export default function SpaceStation({ position }: SpaceStationProps) {
       ))}
 
       {/* Holographic title */}
-      <Text
-        position={[0, 3, 0]}
-        fontSize={0.8}
-        color="#4fd1c7"
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/inter.json"
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-      >
-        WLSFX
-      </Text>
+      <Suspense fallback={null}>
+        <Text
+          position={[0, 3, 0]}
+          fontSize={0.8}
+          color="#4fd1c7"
+          anchorX="center"
+          anchorY="middle"
+          font="/fonts/inter.json"
+          onPointerOver={() => setHovered(true)}
+          onPointerOut={() => setHovered(false)}
+        >
+          WLSFX
+        </Text>
 
-      <Text
-        position={[0, 2.2, 0]}
-        fontSize={0.3}
-        color="#9f7aea"
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/inter.json"
-      >
-        Web3 & Game Developer Portfolio
-      </Text>
+        <Text
+          position={[0, 2.2, 0]}
+          fontSize={0.3}
+          color="#9f7aea"
+          anchorX="center"
+          anchorY="middle"
+          font="/fonts/inter.json"
+        >
+          Web3 & Game Developer Portfolio
+        </Text>
+      </Suspense>
     </group>
   );
 }

@@ -15,8 +15,8 @@ function App() {
     error?: string;
     isChecking: boolean;
   }>({
-    isSupported: false,
-    isChecking: true
+    isSupported: true, // Start with true for faster loading
+    isChecking: false
   });
 
   useEffect(() => {
@@ -72,41 +72,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden', background: '#000' }}>
         <Canvas
-          shadows
           camera={{
             position: [0, 5, 15],
-            fov: 60,
-            near: 0.1,
-            far: 1000
-          }}
-          gl={{
-            antialias: true,
-            powerPreference: "default",
-            failIfMajorPerformanceCaveat: false,
-            alpha: true,
-            preserveDrawingBuffer: false
+            fov: 60
           }}
           onCreated={({ gl }) => {
             console.log('WebGL renderer initialized successfully');
-            
-            // Handle WebGL context lost/restored events
-            const canvas = gl.domElement;
-            canvas.addEventListener('webglcontextlost', (event) => {
-              event.preventDefault();
-              console.warn('WebGL context lost, attempting to restore...');
-            });
-            
-            canvas.addEventListener('webglcontextrestored', () => {
-              console.log('WebGL context restored');
-            });
-          }}
-          onError={(error) => {
-            console.error('Canvas creation error:', error);
-            setWebglSupport({
-              isSupported: false,
-              error: 'WebGL context creation failed',
-              isChecking: false
-            });
           }}
         >
           <color attach="background" args={["#000"]} />
