@@ -3,10 +3,25 @@ import { portfolioData } from "../../lib/constants/portfolioData";
 
 interface WebGLFallbackProps {
   error?: string;
+  onRetry?: () => void;
 }
 
-export default function WebGLFallback({ error }: WebGLFallbackProps) {
+export default function WebGLFallback({ error, onRetry }: WebGLFallbackProps) {
   const [activeSection, setActiveSection] = useState<string>('about');
+  const [isRetrying, setIsRetrying] = useState(false);
+  
+  const handleRetry = async () => {
+    if (!onRetry) return;
+    
+    setIsRetrying(true);
+    console.log('[WebGL Fallback] User initiated retry');
+    
+    // Small delay to show the retry state
+    setTimeout(() => {
+      onRetry();
+      setIsRetrying(false);
+    }, 500);
+  };
 
   const sections = [
     { id: 'about', name: 'About', color: 'text-cyan-400' },
@@ -48,9 +63,39 @@ export default function WebGLFallback({ error }: WebGLFallbackProps) {
           {/* WebGL Error Notice */}
           <div className="max-w-2xl mx-auto bg-gray-900 border border-red-400/30 rounded-lg p-4 mb-8">
             <div className="text-red-400 text-sm mb-2">⚠️ 3D Mode Unavailable</div>
-            <div className="text-gray-300 text-xs">
+            <div className="text-gray-300 text-xs mb-4">
               {error || 'WebGL is not supported in your browser. Showing fallback 2D interface.'}
             </div>
+            
+            {/* Retry Button */}
+            {onRetry && (
+              <div className="text-center">
+                <button
+                  onClick={handleRetry}
+                  disabled={isRetrying}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    isRetrying 
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white hover:from-cyan-600 hover:to-purple-600 hover:scale-105'
+                  }`}
+                >
+                  {isRetrying ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Retrying...
+                    </span>
+                  ) : (
+                    '🔄 Retry 3D Mode'
+                  )}
+                </button>
+                <div className="text-xs text-gray-400 mt-2">
+                  This will re-check WebGL support and attempt to load the 3D portfolio
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

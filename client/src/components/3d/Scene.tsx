@@ -47,15 +47,21 @@ export default function Scene() {
       {/* Particle effects */}
       <ParticleEffects />
 
-      {/* Main 3D portfolio components - render immediately */}
+      {/* Main 3D portfolio components - render safely */}
       {/* Central space station hub */}
-      <SpaceStation position={[0, 0, 0]} />
+      <Suspense fallback={null}>
+        <SpaceStation position={[0, 0, 0]} />
+      </Suspense>
       
       {/* Navigation portals */}
-      <NavigationPortals />
+      <Suspense fallback={null}>
+        <NavigationPortals />
+      </Suspense>
       
       {/* Collectible system */}
-      <CollectibleSystem />
+      <Suspense fallback={null}>
+        <CollectibleSystem />
+      </Suspense>
       
       {/* Section-specific components - wrapped individually */}
       {currentSection === 'about' && (

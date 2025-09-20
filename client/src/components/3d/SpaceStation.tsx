@@ -1,7 +1,8 @@
 import { useFrame } from "@react-three/fiber";
-import { useRef, useState, useMemo, Suspense } from "react";
+import { useRef, useState, Suspense } from "react";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
+import SafeModel, { ModelFallback } from "./SafeModel";
 
 interface SpaceStationProps {
   position: [number, number, number];
@@ -9,100 +10,52 @@ interface SpaceStationProps {
 
 export default function SpaceStation({ position }: SpaceStationProps) {
   const mainRef = useRef<THREE.Group>(null);
-  const ringRefs = useRef<THREE.Mesh[]>([]);
   const [hovered, setHovered] = useState(false);
-
-  // Pre-calculate random values for rings
-  const ringData = useMemo(() => {
-    return Array.from({ length: 3 }, (_, i) => ({
-      radius: 2 + i * 0.5,
-      speed: 0.01 + i * 0.005,
-      offset: (i * Math.PI) / 3,
-    }));
-  }, []);
 
   useFrame((state) => {
     if (mainRef.current) {
       // Main station rotation
       mainRef.current.rotation.y += 0.005;
       mainRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+      
+      // Scale effect when hovered
+      const targetScale = hovered ? 1.1 : 1;
+      mainRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
     }
-
-    // Rotating rings
-    ringRefs.current.forEach((ring, i) => {
-      if (ring) {
-        const data = ringData[i];
-        ring.rotation.z += data.speed;
-        ring.rotation.x = Math.sin(state.clock.elapsedTime + data.offset) * 0.2;
-      }
-    });
   });
 
   return (
     <group position={position}>
-      {/* Main station body */}
-      <group ref={mainRef}>
-        {/* Central core */}
-        <mesh castShadow receiveShadow>
-          <sphereGeometry args={[1.5, 32, 32]} />
-          <meshStandardMaterial
-            color={hovered ? "#4fd1c7" : "#2d3748"}
-            metalness={0.8}
-            roughness={0.2}
-            emissive={hovered ? "#1a202c" : "#000"}
-          />
-        </mesh>
-
-        {/* Station details */}
-        <mesh position={[0, 0, 1.6]} castShadow>
-          <cylinderGeometry args={[0.3, 0.3, 0.8, 8]} />
-          <meshStandardMaterial color="#4a5568" metalness={0.9} roughness={0.1} />
-        </mesh>
-
-        {/* Antenna */}
-        <mesh position={[0, 2, 0]} castShadow>
-          <cylinderGeometry args={[0.05, 0.05, 1, 8]} />
-          <meshStandardMaterial color="#e2e8f0" metalness={1} roughness={0} />
-        </mesh>
-      </group>
-
-      {/* Rotating rings */}
-      {ringData.map((data, i) => (
-        <mesh
-          key={i}
-          ref={(el) => {
-            if (el) ringRefs.current[i] = el;
-          }}
-          position={[0, 0, 0]}
+      {/* 3D Space Station Model */}
+      <group 
+        ref={mainRef}
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
+      >
+        <SafeModel 
+          url="/models/space_station.glb"
+          scale={[2.5, 2.5, 2.5]}
+          fallback={<ModelFallback color="#4fd1c7" scale={[2.5, 2.5, 2.5]} />}
         >
-          <torusGeometry args={[data.radius, 0.1, 8, 32]} />
-          <meshStandardMaterial
-            color="#4fd1c7"
-            metalness={0.5}
-            roughness={0.3}
-            emissive="#0d4d4a"
-            emissiveIntensity={0.2}
-          />
-        </mesh>
-      ))}
+          {() => null}
+        </SafeModel>
+      </group>
 
       {/* Holographic title */}
       <Suspense fallback={null}>
         <Text
-          position={[0, 3, 0]}
+          position={[0, 4, 0]}
           fontSize={0.8}
           color="#4fd1c7"
           anchorX="center"
           anchorY="middle"
           font="/fonts/inter.json"
-          onPointerOver={() => setHovered(true)}
-          onPointerOut={() => setHovered(false)}
         >
           WLSFX
         </Text>
 
         <Text
-          position={[0, 2.2, 0]}
+          position={[0, 3.2, 0]}
           fontSize={0.3}
           color="#9f7aea"
           anchorX="center"
@@ -112,6 +65,31 @@ export default function SpaceStation({ position }: SpaceStationProps) {
           Web3 & Game Developer Portfolio
         </Text>
       </Suspense>
+
+      {/* Floating particles around station */}
+      {Array.from({ length: 8 }).map((_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const radius = 5;
+        return (
+          <mesh 
+            key={i} 
+            position={[
+              Math.cos(angle) * radius, 
+              Math.sin(angle * 0.5) * 2, 
+              Math.sin(angle) * radius
+            ]}
+          >
+            <sphereGeometry args={[0.05, 8, 8]} />
+            <meshBasicMaterial 
+              color="#4fd1c7" 
+              transparent 
+              opacity={0.6}
+            />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
+
+// Model is loaded safely by SafeModel component

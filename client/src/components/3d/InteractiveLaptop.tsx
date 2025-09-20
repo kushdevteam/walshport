@@ -1,6 +1,6 @@
 import { useFrame } from "@react-three/fiber";
-import { Text } from "@react-three/drei";
-import { useRef, useState } from "react";
+import { Text, useGLTF } from "@react-three/drei";
+import { useRef, useState, useMemo } from "react";
 import * as THREE from "three";
 
 interface InteractiveLaptopProps {
@@ -24,8 +24,14 @@ export default function InteractiveLaptop({
   onClick 
 }: InteractiveLaptopProps) {
   const laptopRef = useRef<THREE.Group>(null);
-  const screenRef = useRef<THREE.Mesh>(null);
+  const cubeRef = useRef<THREE.Group>(null);
   const [isHovered, setIsHovered] = useState(false);
+  
+  // Load the gallery cubes 3D model
+  const { scene } = useGLTF('/models/gallery_cubes.glb');
+  
+  // Clone the scene to avoid issues with multiple instances
+  const clonedScene = useMemo(() => scene.clone(), [scene]);
 
   useFrame((state) => {
     if (laptopRef.current) {
@@ -36,11 +42,14 @@ export default function InteractiveLaptop({
       laptopRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
     }
 
-    if (screenRef.current && screenRef.current.material) {
-      // Screen glow animation
-      const material = screenRef.current.material as THREE.MeshStandardMaterial;
-      const intensity = isSelected ? 0.8 + Math.sin(state.clock.elapsedTime * 3) * 0.2 : 0.3;
-      material.emissiveIntensity = intensity;
+    if (cubeRef.current) {
+      // Gallery cube rotation and expansion
+      cubeRef.current.rotation.y += 0.01;
+      cubeRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
+      
+      // Scale effect when selected or hovered
+      const targetScale = isSelected ? 1.3 : isHovered ? 1.1 : 1;
+      cubeRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
     }
   });
 
@@ -58,140 +67,111 @@ export default function InteractiveLaptop({
         document.body.style.cursor = 'default';
       }}
     >
-      {/* Laptop Base */}
-      <mesh position={[0, -0.1, 0]} castShadow receiveShadow>
-        <boxGeometry args={[3, 0.2, 2]} />
-        <meshStandardMaterial
-          color="#2d3748"
-          metalness={0.8}
-          roughness={0.2}
-        />
-      </mesh>
-
-      {/* Laptop Screen */}
-      <mesh position={[0, 0.8, -0.9]} rotation={[-0.2, 0, 0]} castShadow>
-        <boxGeometry args={[3, 1.8, 0.1]} />
-        <meshStandardMaterial
-          color="#1a1a1a"
-          metalness={0.9}
-          roughness={0.1}
-        />
-      </mesh>
-
-      {/* Screen Display */}
-      <mesh 
-        ref={screenRef}
-        position={[0, 0.8, -0.85]} 
-        rotation={[-0.2, 0, 0]}
+      {/* Gallery Cube 3D Model */}
+      <group 
+        ref={cubeRef}
+        scale={[1.5, 1.5, 1.5]}
+        position={[0, 0, 0]}
       >
-        <planeGeometry args={[2.6, 1.5]} />
-        <meshStandardMaterial
+        <primitive 
+          object={clonedScene} 
+          castShadow 
+          receiveShadow
+        />
+      </group>
+
+      {/* Project Information Display */}
+      <group position={[0, 2, 0]}>
+        <Text
+          position={[0, 0, 0]}
+          fontSize={0.2}
           color={project.color}
-          emissive={project.color}
-          emissiveIntensity={0.3}
-          transparent
-          opacity={0.9}
-        />
-      </mesh>
+          anchorX="center"
+          anchorY="middle"
+          font="/fonts/inter.json"
+          maxWidth={3}
+        >
+          {project.title}
+        </Text>
 
-      {/* Project Title on Screen */}
-      <Text
-        position={[0, 1.2, -0.8]}
-        rotation={[-0.2, 0, 0]}
-        fontSize={0.15}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/inter.json"
-        maxWidth={2.4}
-      >
-        {project.title}
-      </Text>
-
-      {/* Project Type Indicator */}
-      <Text
-        position={[0, 0.5, -0.8]}
-        rotation={[-0.2, 0, 0]}
-        fontSize={0.1}
-        color={project.color}
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/inter.json"
-      >
-        {project.type.toUpperCase()}
-      </Text>
-
-      {/* Keyboard */}
-      <mesh position={[0, 0.02, 0.3]} castShadow>
-        <boxGeometry args={[2.4, 0.05, 1]} />
-        <meshStandardMaterial
-          color="#4a5568"
-          metalness={0.3}
-          roughness={0.7}
-        />
-      </mesh>
-
-      {/* Trackpad */}
-      <mesh position={[0, 0.05, 0.6]} castShadow>
-        <boxGeometry args={[1, 0.02, 0.6]} />
-        <meshStandardMaterial
-          color="#2d3748"
-          metalness={0.5}
-          roughness={0.5}
-        />
-      </mesh>
+        <Text
+          position={[0, -0.3, 0]}
+          fontSize={0.12}
+          color="#ffffff"
+          anchorX="center"
+          anchorY="middle"
+          font="/fonts/inter.json"
+        >
+          {project.type.toUpperCase()}
+        </Text>
+      </group>
 
       {/* Hover/Selection Effects */}
       {(isHovered || isSelected) && (
-        <mesh position={[0, -0.5, 0]}>
+        <mesh position={[0, -1, 0]}>
           <cylinderGeometry args={[2, 2, 0.1, 32]} />
           <meshBasicMaterial
             color={project.color}
             transparent
-            opacity={0.2}
+            opacity={0.3}
           />
         </mesh>
       )}
 
-      {/* Project Label */}
-      <Text
-        position={[0, -1, 0]}
-        fontSize={0.2}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/inter.json"
-      >
-        {project.title}
-      </Text>
+      {/* Holographic energy rings around cube */}
+      {(isHovered || isSelected) && (
+        <group>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <mesh key={i} position={[0, i * 0.5 - 1, 0]} rotation={[0, 0, 0]}>
+              <torusGeometry args={[1.5 + i * 0.3, 0.05, 8, 32]} />
+              <meshBasicMaterial
+                color={project.color}
+                transparent
+                opacity={0.4 - i * 0.1}
+              />
+            </mesh>
+          ))}
+        </group>
+      )}
 
-      {/* Selected Project Details */}
+      {/* Expanded Project Details */}
       {isSelected && (
-        <group position={[0, -1.5, 0]}>
+        <group position={[0, -2.5, 0]}>
+          {/* Holographic info panel */}
           <mesh>
-            <planeGeometry args={[4, 1.5]} />
+            <planeGeometry args={[5, 2]} />
             <meshBasicMaterial 
               color="#1a202c" 
               transparent 
-              opacity={0.9} 
+              opacity={0.8} 
+            />
+          </mesh>
+          
+          {/* Glowing border */}
+          <mesh position={[0, 0, -0.01]}>
+            <planeGeometry args={[5.1, 2.1]} />
+            <meshBasicMaterial 
+              color={project.color} 
+              transparent 
+              opacity={0.3} 
             />
           </mesh>
           
           <Text
-            position={[0, 0.3, 0.01]}
-            fontSize={0.12}
+            position={[0, 0.5, 0.01]}
+            fontSize={0.14}
             color="#ffffff"
             anchorX="center"
             anchorY="middle"
             font="/fonts/inter.json"
-            maxWidth={3.5}
+            maxWidth={4.5}
           >
             {project.description}
           </Text>
 
           <Text
             position={[0, 0, 0.01]}
-            fontSize={0.1}
+            fontSize={0.11}
             color={project.color}
             anchorX="center"
             anchorY="middle"
@@ -201,17 +181,20 @@ export default function InteractiveLaptop({
           </Text>
 
           <Text
-            position={[0, -0.3, 0.01]}
-            fontSize={0.08}
-            color="#9f7aea"
+            position={[0, -0.5, 0.01]}
+            fontSize={0.09}
+            color="#4fd1c7"
             anchorX="center"
             anchorY="middle"
             font="/fonts/inter.json"
           >
-            Click to view live demo
+            ▶ Click to explore interactive demo
           </Text>
         </group>
       )}
     </group>
   );
 }
+
+// Preload the model
+useGLTF.preload('/models/gallery_cubes.glb');
